@@ -1,33 +1,53 @@
 import pyrosim.pyrosim as pyrosim
 
 
-def stack_cubes(num_cubes: int, x: float, y: float, z: float, l: float, w: float, h: float):
-    z += h / 2  # coordinates are the middle of the object... apparently
-    for i in range(num_cubes):
-        pyrosim.Send_Cube(name=f"Box{i}", pos=[x, y, z], size=[l, w, h])
-        l *= 0.9
-        w *= 0.9
-        h *= 0.9
-        # since coordinates are center based, we have to account for half the height of the base box and half the
-        # height of the of top box when calculating the next z. hideous, I know.
-        z += (h/2 + (h/0.9 * 2))
+def simple_cube(name: str, x: float = 0, y: float = 0, z: float = 0.5, l: float = 1, w: float = 1, h: float = 1):
+    pyrosim.Send_Cube(name=f"{name}", pos=[x, y, z], size=[l, w, h])
 
 
-def build_crazy_world():
-    x = 0
-    y = 0
-    z = 0
-    l = 1
-    w = 1
-    h = 1
-    for x in range(5):
-        for y in range(5):
-            stack_cubes(10, x, y, z, l, w, h)
-            y += 1
-        x += 1
+def create_world():
+    pyrosim.Start_SDF("world.sdf")
+    simple_cube(name="Box", y=5)
+    pyrosim.End()
+
+
+def create_robot():
+    pyrosim.Start_URDF("body.urdf")
+    simple_cube("Link0")
+    # create a joint between the two cubes, otherwise you can't store them both in the same URDF file
+    # first link uses absolute coordinates. all subsequent links use relative coordinates.
+    pyrosim.Send_Joint(name="Link0_Link1", parent="Link0", child="Link1", type="revolute", position=[0.0,0,1])
+    # since this cube is now a member of the link0 body (linked), it's position is _relative_ to lin0
+    simple_cube(name="Link1", x=0.0, y=0, z=0.5)
+    pyrosim.Send_Joint(name="Link1_Link2", parent="Link1", child="Link2", type="revolute", position=[0.0,0,1])
+    simple_cube(name="Link2", x=0.0, y=0, z=0.5)
+    pyrosim.Send_Joint(name="Link2_Link3", parent="Link2", child="Link3", type="revolute", position=[0.0,0.5,0.5])
+    simple_cube(name="Link3", x=0.0, y=0.5, z=0.0)
+    pyrosim.Send_Joint(name="Link3_Link4", parent="Link3", child="Link4", type="revolute", position=[0.0,1,0.0])
+    simple_cube(name="Link4", x=0.0, y=0.5, z=0.0)
+    pyrosim.Send_Joint(name="Link4_Link5", parent="Link4", child="Link5", type="revolute", position=[0.0,0.5,-0.5])
+    simple_cube(name="Link5", x=0.0, y=0.0, z=-0.5)
+    pyrosim.Send_Joint(name="Link5_Link6", parent="Link5", child="Link6", type="revolute", position=[0.0,0.0,-1])
+    simple_cube(name="Link6", x=0.0, y=0.0, z=-0.5)
+    pyrosim.End()
+
+
+def create_tribot():
+    # note: I made up this name
+    pyrosim.Start_URDF("body.urdf")
+    simple_cube(name="Torso", x=1.5, z=1.5)
+
+    # first link uses absolute coordinate, all subsequent links use relative
+    pyrosim.Send_Joint(name="Torso_BackLeg", parent="Torso", child="BackLeg", type="revolute", position=[1, 0, 1])
+    simple_cube(name="BackLeg", x=-0.5, y=0, z=-0.5)
+
+    # this is another first link in this case
+    pyrosim.Send_Joint(name="Torso_FrontLeg", parent="Torso", child="FrontLeg", type="revolute", position=[2, 0 ,1])
+    simple_cube(name="FrontLeg", x=0.5, y=0, z=-0.5)
+    pyrosim.End()
 
 
 if __name__ == "__main__":
-    pyrosim.Start_SDF("boxes.sdf")
-    build_crazy_world()
-    pyrosim.End()
+    create_world()
+    #create_robot()
+    create_tribot()
