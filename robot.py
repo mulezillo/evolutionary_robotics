@@ -2,14 +2,16 @@ from motor import MOTOR
 from sensor import SENSOR
 import pybullet as p
 import pyrosim.pyrosim as pyrosim
+from pyrosim.neuralNetwork import NEURAL_NETWORK
 import constants as c
 
 
 class ROBOT:
     def __init__(self):
+        self.robotId = p.loadURDF("body.urdf")
+        self.nn = NEURAL_NETWORK("brain.nndf")
         self.sensors = {}
         self.motors = {}
-        self.robotId = p.loadURDF("body.urdf")
         pyrosim.Prepare_To_Simulate(self.robotId)
         self.prepare_to_sense()
         self.prepare_to_act()
@@ -34,6 +36,14 @@ class ROBOT:
         for sensor in self.sensors.values():
             sensor.get_value(time_step)
 
-    def act(self, time_step: int):
-        for motor in self.motors.values():
-            motor.set_value(time_step, self.robotId)
+    def think(self):
+        self.nn.Print()
+        self.nn.Update()  # this is a function we added to pyrosim
+
+    def act(self):
+        for neuron_name in self.nn.Get_Neuron_Names():
+            if self.nn.Is_Motor_Neuron(neuron_name):
+                joint_name = self.nn.Get_Motor_Neurons_Joint(neuron_name)
+                desired_angle = self.nn.Get_Value_Of(neuron_name)
+                # annoyingly, these keys are encoded as bytes (b'' string). This is one way to tackle this issue...
+                self.motors[joint_name.encode('UTF-8')].set_value(desired_angle, self.robotId)

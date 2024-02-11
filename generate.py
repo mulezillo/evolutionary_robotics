@@ -11,6 +11,7 @@ def create_world():
     pyrosim.End()
 
 
+# Leaving this here for reference
 def create_robot():
     pyrosim.Start_URDF("body.urdf")
     simple_cube("Link0")
@@ -32,8 +33,8 @@ def create_robot():
     pyrosim.End()
 
 
-def create_tribot():
-    # note: I made up this name
+def generate_tribot():
+
     pyrosim.Start_URDF("body.urdf")
     simple_cube(name="Torso", x=1.5, z=1.5)
 
@@ -47,7 +48,20 @@ def create_tribot():
     pyrosim.End()
 
 
+def generate_brain():
+    pyrosim.Start_NeuralNetwork("brain.nndf")
+
+    pyrosim.Send_Sensor_Neuron(name=0, linkName="Torso")
+    pyrosim.Send_Sensor_Neuron(name=1, linkName="BackLeg")
+    pyrosim.Send_Sensor_Neuron(name=2, linkName="FrontLeg")
+
+    pyrosim.Send_Motor_Neuron(name=3, jointName="Torso_BackLeg")
+    pyrosim.Send_Motor_Neuron(name=4, jointName="Torso_FrontLeg")
+
+    pyrosim.End()
+
+
 if __name__ == "__main__":
     create_world()
-    #create_robot()
-    create_tribot()
+    generate_tribot()
+    generate_brain()
