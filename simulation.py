@@ -26,8 +26,6 @@ class SIMULATION:
         for t in range(num_sims):
             p.stepSimulation()
             self.robot.sense(time_step=t)
-            self.robot.act(time_step=t)
+            self.robot.think()
+            self.robot.act()
             time.sleep(c.SIM_SLEEP)
-
-
-
