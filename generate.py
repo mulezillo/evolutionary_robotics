@@ -1,4 +1,5 @@
 import pyrosim.pyrosim as pyrosim
+import random
 
 
 def simple_cube(name: str, x: float = 0, y: float = 0, z: float = 0.5, l: float = 1, w: float = 1, h: float = 1):
@@ -58,11 +59,16 @@ def generate_brain():
     pyrosim.Send_Motor_Neuron(name=3, jointName="Torso_BackLeg")
     pyrosim.Send_Motor_Neuron(name=4, jointName="Torso_FrontLeg")
 
+    for sensor in range(3):
+        # we are iterating over sensors by sensor integer name. ugly, as always
+        for motor in range(3, 5):
+            pyrosim.Send_Synapse(sourceNeuronName=sensor, targetNeuronName=motor, weight=random.uniform(-1,1))
+
     # connects neuron 0 to neuron 3 with weight of 1
-    pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=3, weight=0.0)
-    pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=3, weight=0.0)
-    pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=4, weight=-1.0)
-    pyrosim.Send_Synapse(sourceNeuronName=2, targetNeuronName=4, weight=-1.0)
+    # pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=3, weight=0.0)
+    # pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=3, weight=0.0)
+    # pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=4, weight=-1.0)
+    # pyrosim.Send_Synapse(sourceNeuronName=2, targetNeuronName=4, weight=-1.0)
 
     pyrosim.End()
 
