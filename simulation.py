@@ -8,14 +8,15 @@ import time
 
 
 class SIMULATION:
-    def __init__(self, display: str = "DISPLAY"):
-        self.physicsClient = p.connect(
-            p.GUI if display.upper() == "DISPLAY" else (p.DIRECT if display.upper() == "DIRECT" else p.DIRECT))
+    def __init__(self, display, sim_id):
+        self.sim_id = sim_id
+        self.display = True if display.upper() == "DISPLAY" else False
+        self.physicsClient = p.connect(p.GUI if self.display else p.DIRECT)
 
         # add path to URDF files before creating world and robot (they need the connection + path)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
         self.world = WORLD()
-        self.robot = ROBOT()
+        self.robot = ROBOT(self.sim_id)
 
         p.setGravity(0, 0, c.GRAVITY)
         pyrosim.Prepare_To_Simulate(self.robot.robotId)
@@ -29,7 +30,8 @@ class SIMULATION:
             self.robot.sense(time_step=t)
             self.robot.think()
             self.robot.act()
-            time.sleep(c.SIM_SLEEP)
+            if self.display:
+                time.sleep(c.SIM_SLEEP)
 
     def get_fitness(self):
         self.robot.get_fitness()
