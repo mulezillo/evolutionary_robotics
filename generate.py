@@ -64,12 +64,6 @@ def generate_brain():
         for motor in range(3, 5):
             pyrosim.Send_Synapse(sourceNeuronName=sensor, targetNeuronName=motor, weight=random.uniform(-1,1))
 
-    # connects neuron 0 to neuron 3 with weight of 1
-    # pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=3, weight=0.0)
-    # pyrosim.Send_Synapse(sourceNeuronName=1, targetNeuronName=3, weight=0.0)
-    # pyrosim.Send_Synapse(sourceNeuronName=0, targetNeuronName=4, weight=-1.0)
-    # pyrosim.Send_Synapse(sourceNeuronName=2, targetNeuronName=4, weight=-1.0)
-
     pyrosim.End()
 
 

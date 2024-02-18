@@ -8,8 +8,9 @@ import time
 
 
 class SIMULATION:
-    def __init__(self):
-        self.physicsClient = p.connect(p.GUI)
+    def __init__(self, display: str = "DISPLAY"):
+        self.physicsClient = p.connect(
+            p.GUI if display.upper() == "DISPLAY" else (p.DIRECT if display.upper() == "DIRECT" else p.DIRECT))
 
         # add path to URDF files before creating world and robot (they need the connection + path)
         p.setAdditionalSearchPath(pybullet_data.getDataPath())
@@ -29,3 +30,6 @@ class SIMULATION:
             self.robot.think()
             self.robot.act()
             time.sleep(c.SIM_SLEEP)
+
+    def get_fitness(self):
+        self.robot.get_fitness()

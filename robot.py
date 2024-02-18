@@ -37,7 +37,6 @@ class ROBOT:
             sensor.get_value(time_step)
 
     def think(self):
-        self.nn.Print()
         self.nn.Update()  # this is a function we added to pyrosim
 
     def act(self):
@@ -47,3 +46,13 @@ class ROBOT:
                 desired_angle = self.nn.Get_Value_Of(neuron_name)
                 # annoyingly, these keys are encoded as bytes (b'' string). This is one way to tackle this issue...
                 self.motors[joint_name.encode('UTF-8')].set_value(desired_angle, self.robotId)
+
+    def get_fitness(self):
+        state_of_link_zero = p.getLinkState(self.robotId, 0)
+        position_of_link_zero = state_of_link_zero[0]
+        x_coordinate_of_link_zero = position_of_link_zero[0]
+
+        # write to file
+        f = open("fitness.txt", "w")
+        f.write(str(x_coordinate_of_link_zero))
+        f.close()

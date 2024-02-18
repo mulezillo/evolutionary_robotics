@@ -73,7 +73,6 @@ class NEURON:
     def Update_Hidden_Or_Motor_Neuron(self, neurons: dict, synapses: dict):
         # apparently we need to initialize this
         self.Set_Value(0.0)
-        print(self.Get_Value())
         for syn in synapses.keys():
             if syn[1] == self.Get_Name():
                 # this synapse goes to this neuron. Get synapse weight and the value of the pre-synaptic neuron
