@@ -4,12 +4,16 @@ import pybullet as p
 import pyrosim.pyrosim as pyrosim
 from pyrosim.neuralNetwork import NEURAL_NETWORK
 import constants as c
+import os
 
 
 class ROBOT:
-    def __init__(self):
+    def __init__(self, sim_id):
+        self.sim_id = sim_id
         self.robotId = p.loadURDF("body.urdf")
-        self.nn = NEURAL_NETWORK("brain.nndf")
+        self.nn = NEURAL_NETWORK(f"brain_{self.sim_id}.nndf")
+        # apparently we should delete the brain file after it is read
+        os.system(f"rm brain_{self.sim_id}.nndf")
         self.sensors = {}
         self.motors = {}
         pyrosim.Prepare_To_Simulate(self.robotId)
@@ -43,7 +47,7 @@ class ROBOT:
         for neuron_name in self.nn.Get_Neuron_Names():
             if self.nn.Is_Motor_Neuron(neuron_name):
                 joint_name = self.nn.Get_Motor_Neurons_Joint(neuron_name)
-                desired_angle = self.nn.Get_Value_Of(neuron_name)
+                desired_angle = c.MOTOR_JOINT_RANGE * self.nn.Get_Value_Of(neuron_name)
                 # annoyingly, these keys are encoded as bytes (b'' string). This is one way to tackle this issue...
                 self.motors[joint_name.encode('UTF-8')].set_value(desired_angle, self.robotId)
 
@@ -52,7 +56,9 @@ class ROBOT:
         position_of_link_zero = state_of_link_zero[0]
         x_coordinate_of_link_zero = position_of_link_zero[0]
 
-        # write to file
-        f = open("fitness.txt", "w")
+        # write to temp file, then move. This way we are sure that we have finished writing to the file before
+        # trying to read from it later
+        f = open(f"tmp_{self.sim_id}.txt", "w")
         f.write(str(x_coordinate_of_link_zero))
         f.close()
+        os.system(f"mv tmp_{self.sim_id}.txt fitness_{self.sim_id}.txt")
